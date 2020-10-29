@@ -83,7 +83,6 @@
 		4A4CEC1A2547DDC400F9AE83 = {
 			isa = PBXGroup;
 			children = (
-				4A2F5673254B169900B149D8 /* Extensions */,
 				4A7B81F725493CB200AC385F /* Location+CoreDataClass.swift */,
 				4A7B81F825493CB200AC385F /* Location+CoreDataProperties.swift */,
 				4A4CEC252547DDC400F9AE83 /* MyLocation */,
@@ -103,6 +102,7 @@
 		4A4CEC252547DDC400F9AE83 /* MyLocation */ = {
 			isa = PBXGroup;
 			children = (
+				4A2F5673254B169900B149D8 /* Extensions */,
 				4A7B81F12549323E00AC385F /* utils */,
 				4A7B81EE254912A700AC385F /* Views */,
 				4A4CEC3C2548171B00F9AE83 /* View Controllers */,
