@@ -7,16 +7,46 @@
 //
 
 import UIKit
+import CoreData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "DataModel")
+        container.loadPersistentStores{
+            storeDescription, error in
+            if let error = error{
+                fatalError("could not load data store: \(error)")
+            }
+        }
+        return container
+    }()
+    
+    lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
+    
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
+        //依赖注入将context 传递给其他view controller
+        let tabController = window?.rootViewController as? UITabBarController
+        if let tabController = tabController{
+            if let controllers = tabController.viewControllers{
+                // tab 1
+                var naviController = controllers[0] as! UINavigationController
+                let controller1 = naviController.viewControllers.first as! CurrentLocationViewController
+                controller1.managedObjectContext = managedObjectContext
+                //tab 2
+                naviController = controllers[1] as! UINavigationController
+                let controller2 = naviController.viewControllers.first as! LocationsViewController
+                controller2.managedObjectContext = managedObjectContext
+                //tab 3
+                naviController = controllers[2] as! UINavigationController
+                let controller3 = naviController.viewControllers.first as! MapViewController
+                controller3.managedObjectContext = managedObjectContext
+            }
+        }
+        listenForFatalCoreDataNotifications() //开始监听Notification
         guard let _ = (scene as? UIWindowScene) else { return }
     }
 
@@ -48,6 +78,30 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
+    func listenForFatalCoreDataNotifications(){
+        NotificationCenter.default.addObserver(forName: CoreDataSaveFailedNotification, object: nil, queue: OperationQueue.main){
+            notification in
+            let message = """
+            There was a fatal error in the app and it cannot continue.
 
+            Press OK to terminate the app. Sorry for the inconvenience.
+            """
+            
+            let alert = UIAlertController(title: "Internal Error", message: message, preferredStyle: .alert)
+            
+            let action = UIAlertAction(title: "OK", style: .default, handler: {
+                _ in
+                let exception = NSException(
+                          name: NSExceptionName.internalInconsistencyException,
+                          reason: "Fatal Core Data error", userInfo: nil)
+                exception.raise()
+            })
+            
+            alert.addAction(action)
+            
+            let tabController = self.window!.rootViewController!
+            tabController.present(alert, animated: true, completion: nil)
+        }
+    }
 }
 

@@ -10,15 +10,41 @@ import UIKit
 
 class LocationCell: UITableViewCell {
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    @IBOutlet weak var locationDescriptionLabel: UILabel!
+    @IBOutlet weak var addressLabel: UILabel!
+    @IBOutlet weak var photoImageView: UIImageView!
+    
+    func configure(for location: Location){
+        if !location.locationDescription.isEmpty{
+            locationDescriptionLabel.text = location.locationDescription
+        }else{
+            locationDescriptionLabel.text = "(No Description)"
+        }
+        
+        if let placemark = location.placemark {
+            var text = ""
+            if let s = placemark.subThoroughfare {
+              text += s + " "
+            }
+            if let s = placemark.thoroughfare {
+              text += s + ", "
+            }
+            if let s = placemark.locality {
+              text += s
+            }
+            addressLabel.text = text
+          } else {
+            addressLabel.text = String(format:
+              "Lat: %.8f, Long: %.8f", location.latitude,
+                                       location.longitude)
+          }
+        photoImageView.image = thumbnail(for: location)
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    func thumbnail(for location: Location) -> UIImage{
+        if location.hasPhoto, let image = location.photoImage{
+            return image.resized(withBounds: CGSize(width: 52, height: 52))
+        }
+        return UIImage()
     }
-
 }

@@ -9,13 +9,78 @@
 import UIKit
 
 class HudView: UIView {
+    
+    var text = ""
 
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
+    class func Hud(inView view: UIView, animated: Bool) -> HudView{
+        let hudView = HudView(frame: view.bounds)
+        hudView.isOpaque = false //hudView是透明的
+        view.addSubview(hudView)
+        view.isUserInteractionEnabled = false //不允许用户交互
+        
+//        hudView.backgroundColor = UIColor(red: 1, green: 0, blue: 0, alpha: 0.5)
+        hudView.show(animated: true)
+        return hudView
     }
-    */
+    
+    override func draw(_ rect: CGRect) {
+          let boxWidth: CGFloat = 96
+          let boxHeight: CGFloat = 96
 
+          let boxRect = CGRect(
+            x: round((bounds.size.width - boxWidth) / 2),
+            y: round((bounds.size.height - boxHeight) / 2),
+            width: boxWidth,
+            height: boxHeight)
+
+          let roundedRect = UIBezierPath(roundedRect: boxRect, //设置圆角
+                                        cornerRadius: 10)
+          UIColor(white: 0.3, alpha: 0.8).setFill()
+          roundedRect.fill()
+        
+        //Draw image
+        if let image = UIImage(named: "Checkmark"){
+            let imagePoint = CGPoint(
+                x: center.x - round(image.size.width / 2),
+                y: center.y - round(image.size.height / 2) - boxHeight / 8)
+              image.draw(at: imagePoint)
+        }
+        
+        
+        // Draw the text
+        let attribs = [ //设置字体属性
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16),
+            NSAttributedString.Key.foregroundColor: UIColor.white ]
+        let textSize = text.size(withAttributes: attribs)
+
+        //设置绘制坐标
+        let textPoint = CGPoint(
+          x: center.x - round(textSize.width / 2),
+          y: center.y - round(textSize.height / 2) + boxHeight / 4)
+
+        text.draw(at: textPoint, withAttributes: attribs)
+    }
+    
+    //MARK:- public method
+    
+    func show(animated: Bool){
+        if animated{
+            alpha = 0
+            transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+//            UIView.animate(withDuration: 1){
+//                self.alpha = 1
+//                self.transform = CGAffineTransform.identity
+//            }
+            //改进动画效果
+            UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [], animations: {
+                self.alpha = 1
+                self.transform = CGAffineTransform.identity
+            }, completion: nil)
+        }
+    }
+    
+    func hide(){
+        superview?.isUserInteractionEnabled = true
+        removeFromSuperview()
+    }
 }
